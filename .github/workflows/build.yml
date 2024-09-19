@@ -44,6 +44,11 @@ jobs:
        with:
         releaseDirectory: build/app/outputs/bundle/release/
         signingKeyBase64: ${{ secrets.ANDROID_KEYSTORE_FILE_BASE64 }}
-        alias: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}         
-        keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}             
+        alias: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
+        keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         keyPassword: ${{ secrets.ANDROID_SIGNING_KEY_PASSWORD }}
+     - name: Upload Signed App Bundle
+       uses: actions/upload-artifact@v3
+       with:
+          name: signed-app-bundle
+          path: ${{steps.sign_app.outputs.signedReleaseFile}}
