@@ -23,6 +23,12 @@ jobs:
      # Checkout to the selected branch
      - name: Checkout
        uses: actions/checkout@v4
+     - name: Setup JDK
+       uses: actions/setup-java@v4
+       with:
+         distribution: 'temurin'
+         java-version: '17'
+         cache: 'gradle'
      # Download and install flutter packages
      - name: Install Flutter
        uses: subosito/flutter-action@v2
