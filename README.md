@@ -1,16 +1,23 @@
 # grape
 
-A new Flutter project.
+Create project
+```bash
+flutter create --org info.loveai --project-name grape --platforms android,ios flutter_grape
+```
+
+Create keystore
+```bash
+keytool -genkey -v -keystore grape.keystore -alias grape -keyalg RSA -keysize 2048 -validity 10240
+base64 -i grape.keystore -o keystore-base64.txt
+java -jar pepk.jar --keystore=grape.keystore --alias=grape --output=output.zip --include-cert --rsa-aes-encryption --encryption-key-path=encryption_public_key.pem
+```
+
+Build Android App
+```bash
+flutter build apk --debug --target-platform=android-arm64
+```
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## References
+- [Flutter: Build and Deploy Android apps using GitHub Actions](https://tbrgroup.software/flutter-build-and-deploy-android-apps-using-github-actions/)
