@@ -6,66 +6,77 @@ name: Build
 on:
   # A new push to the "main" branch. 
   push:
-   branches: [ "main" ]
+    branches: [ "main" ]
  
   # Allows to trigger the workflow from GitHub interfaces.
   workflow_dispatch:
  
 # A single workflow can have multiple jobs.
 jobs: 
- # 'A new job is defined with the name: "build_android" 
- build_android:
-   # Defines what operating system will be used for the actions.
-   # For android, we will use Linux GitHub-Hosted Runner.
-   runs-on: ubuntu-latest
-   # Defines what step should be passed for successful run
-   steps:
-     # Checkout to the selected branch
-     - name: Checkout
-       uses: actions/checkout@v4
-     - name: Setup JDK
-       uses: actions/setup-java@v4
-       with:
-         distribution: 'temurin'
-         java-version: '17'
-         cache: 'gradle'
-     - name: Setup Android SDK
-       uses: android-actions/setup-android@v3
-     # Download and install flutter packages
-     - name: Install Flutter
-       uses: subosito/flutter-action@v2
-       with:
-         # Define which stable flutter version should be used
-         flutter-version: "3.24.3"
-         channel: 'stable'
-         # Enables cache for flutter packages              
-         # Speed up the process
-         cache: true
-     # Get Flutter project dependencies
-     - name: Get dependencies
-       run: flutter pub get
-     - name: Build release app bundle
-       run: flutter build appbundle --target-platform android-arm64
-     - name: Sign App Bundle
-       uses: r0adkll/sign-android-release@v1   
-       id: sign_app
-       with:
-        releaseDirectory: build/app/outputs/bundle/release/
-        signingKeyBase64: ${{ secrets.ANDROID_KEYSTORE_FILE_BASE64 }}
-        alias: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
-        keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-        keyPassword: ${{ secrets.ANDROID_SIGNING_KEY_PASSWORD }}
-    #  - name: Upload Signed App Bundle
-    #    uses: actions/upload-artifact@v4
-    #    with:
-    #       name: signed-app-bundle
-    #       path: ${{steps.sign_app.outputs.signedReleaseFile}}
-     - name: Upload to Play Store (Internal Testing)
-       uses: r0adkll/upload-google-play@v1.1.3
-       with:
-        serviceAccountJsonPlainText: ${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON }}
-        packageName: info.loveai.grape
-        releaseFiles: ${{steps.sign_app.outputs.signedReleaseFile}}
-        mappingFile: ./build/app/outputs/mapping/release/mapping.txt
-        track: internal
-        status: draft
+  # 'A new job is defined with the name: "build_android" 
+  build_android:
+    # Defines what operating system will be used for the actions.
+    # For android, we will use Linux GitHub-Hosted Runner.
+    runs-on: ubuntu-latest
+    # Defines what step should be passed for successful run
+    steps:
+      # Checkout to the selected branch
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+      # Download and install flutter packages
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          # Define which stable flutter version should be used
+          flutter-version: "3.24.3"
+          channel: 'stable'
+          # Enables cache for flutter packages              
+          # Speed up the process
+          cache: true
+      # Get Flutter project dependencies
+      - name: Get dependencies
+        run: flutter pub get
+      #5 Setup Keystore
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_FILE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+        
+      - name: Create key.properties
+        run: |
+          echo "storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" > android/key.properties
+          echo "keyPassword=${{ secrets.ANDROID_SIGNING_KEY_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}" >> android/key.properties
+          echo "storeFile=keystore.jks" >> android/key.properties
+      - name: Build release app bundle
+        run: flutter build appbundle --release --target-platform android-arm64
+      # - name: Sign App Bundle
+      #   uses: r0adkll/sign-android-release@v1   
+      #   id: sign_app
+      #   with:
+      #     releaseDirectory: build/app/outputs/bundle/release/
+      #     signingKeyBase64: ${{ secrets.ANDROID_KEYSTORE_FILE_BASE64 }}
+      #     alias: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
+      #     keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      #     keyPassword: ${{ secrets.ANDROID_SIGNING_KEY_PASSWORD }}
+      #  - name: Upload Signed App Bundle
+      #    uses: actions/upload-artifact@v4
+      #    with:
+      #       name: signed-app-bundle
+      #       path: ${{steps.sign_app.outputs.signedReleaseFile}}
+      - name: Upload to Play Store (Internal Testing)
+        uses: r0adkll/upload-google-play@v1.1.3
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON }}
+          packageName: info.loveai.grape
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          mappingFile: build/app/outputs/mapping/release/mapping.txt
+          track: internal
+          status: draft
