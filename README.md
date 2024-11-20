@@ -27,3 +27,6 @@ flutter build ipa --no-codesign
 - [Automating Flutter Builds with GitHub Actions: A Step-by-Step Guide](https://medium.com/@colonal/automating-flutter-builds-and-releases-with-github-actions-77ccf4a1ccdd)
 - https://github.com/marketplace/actions/flutter-action
 - [Build and release an iOS app](https://docs.flutter.dev/deployment/ios)
+- [iOS Build Action](https://www.andrewhoog.com/post/how-to-build-an-ios-app-with-github-actions-2023/)
+- [build-ios-action](https://github.com/marketplace/actions/build-ios-action)
+- [ios-build-action](https://github.com/marketplace/actions/ios-build-action)
